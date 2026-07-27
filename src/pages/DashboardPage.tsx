@@ -133,8 +133,6 @@
 // }
 
 
-
-
 // pages/DashboardPage.tsx
 import { CalendarDays, MessageCircle, Plus, DollarSign, ShoppingBag, Package, Clock } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -217,7 +215,7 @@ export default function DashboardPage() {
         
         // Fetch all orders for statistics
         const ordersSnapshot = await getDocs(collection(db, 'orders'))
-        const orders = ordersSnapshot.docs.map(doc => ({
+        const orders = ordersSnapshot.docs.map((doc: any) => ({
           id: doc.id,
           ...doc.data()
         }))
@@ -232,7 +230,7 @@ export default function DashboardPage() {
         )
         const recentOrdersSnapshot = await getDocs(recentOrdersQuery)
         
-        const recentOrdersData: Order[] = recentOrdersSnapshot.docs.map((docSnap) => {
+        const recentOrdersData: Order[] = recentOrdersSnapshot.docs.map((docSnap: any) => {
           const d = docSnap.data()
           const items: OrderItem[] = (d.items ?? []).map((item: any, i: number) => ({
             id: `${docSnap.id}-${i}`,
@@ -303,7 +301,7 @@ export default function DashboardPage() {
         // Get processing orders count
         const processingOrdersQuery = query(
           collection(db, 'orders'),
-          where('status', '==', 'Processing')
+          where('status', '==', 'processing')
         )
         const processingSnapshot = await getDocs(processingOrdersQuery)
         const processingOrders = processingSnapshot.size

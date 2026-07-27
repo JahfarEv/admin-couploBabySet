@@ -92,6 +92,7 @@ interface Customer {
   id: string
   name: string
   email: string
+  phone: string
   initials: string
   location: string
   orders: number
@@ -113,7 +114,7 @@ export default function CustomersPage() {
         setLoading(true)
         const snapshot = await getDocs(collection(db, 'users'))
 
-        const data: Customer[] = snapshot.docs.map((docSnap) => {
+        const data: Customer[] = snapshot.docs.map((docSnap: any) => {
           const d = docSnap.data()
           const name = d.name ?? 'Unknown customer'
 
@@ -121,7 +122,7 @@ export default function CustomersPage() {
             id: docSnap.id,
             name,
             email: d.email ?? '—',
-                        phone: d.phone ?? '—',
+            phone: d.phone ?? '—',
 
             initials: getInitials(name),
             location: d.location ?? '—',

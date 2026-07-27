@@ -339,13 +339,13 @@ export default function CartsPage() {
         const cartsSnap = await getDocs(collection(db, 'carts'))
 
         // Skip empty/cleared carts
-        const cartDocs = cartsSnap.docs.filter((d) => {
+        const cartDocs = cartsSnap.docs.filter((d: any) => {
           const items = d.data().items
           return Array.isArray(items) && items.length > 0
         })
 
         const enriched = await Promise.all(
-          cartDocs.map(async (cartDoc) => {
+          cartDocs.map(async (cartDoc: any) => {
             const userId = cartDoc.id
             const items = cartDoc.data().items ?? []
 

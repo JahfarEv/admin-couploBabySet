@@ -182,7 +182,7 @@ export default function OrdersPage() {
         setLoading(true);
         const snapshot = await getDocs(collection(db, "orders"));
 
-        const data: Order[] = snapshot.docs.map((docSnap) => {
+        const data: Order[] = snapshot.docs.map((docSnap: any) => {
           const d = docSnap.data();
           const items: OrderItem[] = (d.items ?? []).map(
             (item: any, i: number) => ({
@@ -203,7 +203,7 @@ export default function OrdersPage() {
           return {
             id: docSnap.id,
             customerName: d.userName ?? "Unknown customer",
-            customerEmail: d.userEmail ?? "Unknown customer",
+            userEmail: d.userEmail ?? "Unknown customer",
 
             customerInitials: getInitials(d.userName ?? ""),
             date: formatOrderDate(d.orderDate),
@@ -233,7 +233,7 @@ const filtered = useMemo(() => {
     const search = query.toLowerCase();
 
     const matchesQuery =
-      (o.userName || "").toLowerCase().includes(search) ||
+      (o.customerName || "").toLowerCase().includes(search) ||
       (o.userEmail || "").toLowerCase().includes(search) ||
       (o.id || "").toLowerCase().includes(search);
 
@@ -363,7 +363,7 @@ const filtered = useMemo(() => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-ink-muted">
-                      {order.customerEmail}
+                      {order.userEmail}
                     </td>
                     <td className="px-6 py-4 text-ink-muted">{order.date}</td>
                     <td className="px-6 py-4 text-ink-soft">
