@@ -23,6 +23,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from '@/config/firebase';
+
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/config/firebase";
 import type { AdminUser } from '@/types';
 
 function mapFirebaseUser(user: FirebaseUser | null): AdminUser | null {
@@ -59,16 +62,62 @@ export function useAuth() {
         remember ? browserLocalPersistence : browserSessionPersistence,
       );
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      setUser(mapFirebaseUser(userCredential.user));
+      // const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+
+      const userCredential = await signInWithEmailAndPassword(
+  auth,
+  email,
+  password
+);
+
+const uid = userCredential.user.uid;
+// console.log(uid, 'uid');
+
+const adminRef = doc(db, "admin", uid)
+console.log(adminRef, 'admin');
+
+const adminSnap = await getDoc(adminRef);
+
+console.log("Exists:", adminSnap.exists());
+
+if (adminSnap.exists()) {
+  console.log("Data:", adminSnap.data());
+} else {
+  console.log("Document not found");
+}
+
+if (!adminSnap.exists()) {
+  await signOut(auth);
+  throw new Error("You are not authorized to access the admin panel.");
+}
+
+const admin = adminSnap.data();
+
+if (!admin.active) {
+  await signOut(auth);
+  throw new Error("Admin account is disabled.");
+}
+
+setUser(mapFirebaseUser(userCredential.user))
+      // setUser(mapFirebaseUser(userCredential.user));
       return userCredential.user;
-    } catch (err) {
-      const errorMessage = getAuthErrorMessage(err);
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+   } catch (err) {
+  let errorMessage: string;
+
+  if (err instanceof Error && !('code' in err)) {
+    // Our own custom errors
+    errorMessage = err.message;
+  } else {
+    // Firebase auth errors
+    errorMessage = getAuthErrorMessage(err);
+  }
+
+  setError(errorMessage);
+  throw new Error(errorMessage);
+} finally {
+  setIsLoading(false);
+}
   };
 
   const logout = async () => {

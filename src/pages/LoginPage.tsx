@@ -2,25 +2,50 @@ import { Eye, EyeOff, Lock, LogIn, Mail } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-
+import Loader from "@/components/Loader";
 export default function LoginPage() {
   const { login, isLoading, error } = useAuth()
   const navigate = useNavigate()
+  const [minLoading, setMinLoading] = useState(false)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(false)
+if (isLoading) {
+  return <Loader />;
+}
+
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    setMinLoading(true)
+    
     try {
       await login(email, password, remember)
+      
+      // Ensures loader shows for at least 1.5 seconds
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
       navigate('/', { replace: true })
     } catch {
-      // error surfaced via auth context
+      setMinLoading(false) // Hide loader on error
     }
   }
+
+  if (isLoading || minLoading) {
+    return <Loader />
+  }
+
+  // async function handleSubmit(e: FormEvent) {
+  //   e.preventDefault()
+  //   try {
+  //     await login(email, password, remember)
+  //     navigate('/', { replace: true })
+  //   } catch {
+  //     // error surfaced via auth context
+  //   }
+  // }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-cream px-4 py-10">

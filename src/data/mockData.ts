@@ -1,7 +1,7 @@
 import type { CartCustomer, Customer, Order, Product, StatSummary } from '@/types'
 
 export const statSummaries: StatSummary[] = [
-  { label: 'Total Sales', value: '$24,450.00', delta: '+12.5%', deltaPositive: true, icon: 'sales' },
+  // { label: 'Total Sales', value: '$24,450.00', delta: '+12.5%', deltaPositive: true, icon: 'sales' },
   { label: 'Total Orders', value: '1,284', delta: '+8.2%', deltaPositive: true, icon: 'orders' },
   { label: 'New Customers', value: '456', delta: '+15%', deltaPositive: true, icon: 'customers' },
   { label: 'Total Products', value: '16', delta: '+2.4%', deltaPositive: true, icon: 'products' },
