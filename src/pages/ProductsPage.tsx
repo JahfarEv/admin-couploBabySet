@@ -721,7 +721,7 @@ function ProductModal({
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm text-ink-soft">Price ($) *</label>
+              <label className="mb-1.5 block text-sm text-ink-soft">Price *</label>
               <input
                 type="number"
                 min="0"
@@ -747,7 +747,7 @@ function ProductModal({
                 required
               />
             </div>
-            <div>
+            {/* <div>
               <label className="mb-1.5 block text-sm text-ink-soft">Sold</label>
               <input
                 type="number"
@@ -756,8 +756,7 @@ function ProductModal({
                 onChange={(e) => setSold(e.target.value)}
                 className="w-full rounded-xl border border-black/10 bg-cream-soft px-3.5 py-2.5 text-sm focus:border-mauve-400 focus:outline-none"
               />
-            </div>
-          </div>
+            </div> */}
 
           {/* Status */}
           <div>
@@ -766,12 +765,13 @@ function ProductModal({
               value={status}
               onChange={(e) => setStatus(e.target.value as 'Active' | 'Draft' | 'Out of Stock')}
               className="w-full rounded-xl border border-black/10 bg-cream-soft px-3.5 py-2.5 text-sm focus:border-mauve-400 focus:outline-none"
-            >
+              >
               <option value="Draft">Draft</option>
               <option value="Active">Active</option>
               <option value="Out of Stock">Out of Stock</option>
             </select>
           </div>
+              </div>
 
           {/* Image Upload */}
           <div>
