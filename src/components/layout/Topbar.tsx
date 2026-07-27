@@ -8,17 +8,17 @@ export default function Topbar({ searchPlaceholder = 'Search for orders, product
 
   return (
     <header className="flex items-center gap-4 border-b border-black/5 bg-cream px-8 py-5">
-      <div className="relative flex-1 max-w-md">
+      {/* <div className="relative flex-1 max-w-md">
         <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-faint" />
         <input
           type="text"
           placeholder={searchPlaceholder}
           className="w-full rounded-full border border-black/5 bg-white py-2.5 pl-11 pr-4 text-sm text-ink placeholder:text-ink-faint focus:border-mauve-400 focus:outline-none"
         />
-      </div>
+      </div> */}
 
       <div className="ml-auto flex items-center gap-4">
-        <button
+        {/* <button
           type="button"
           className="flex h-10 w-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-black/[0.04]"
           aria-label="Notifications"
@@ -31,7 +31,7 @@ export default function Topbar({ searchPlaceholder = 'Search for orders, product
           aria-label="Help"
         >
           <HelpCircle size={19} />
-        </button>
+        </button> */}
         <div className="h-6 w-px bg-black/10" />
         <div className="relative">
           <button

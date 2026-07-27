@@ -301,7 +301,7 @@ export default function DashboardPage() {
         // Get processing orders count
         const processingOrdersQuery = query(
           collection(db, 'orders'),
-          where('status', '==', 'processing')
+          where('status', '==', 'Processing')
         )
         const processingSnapshot = await getDocs(processingOrdersQuery)
         const processingOrders = processingSnapshot.size
