@@ -214,7 +214,7 @@ export default function ProductsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-ink-soft">{product.category}</td>
-                      <td className="px-6 py-4 font-medium text-ink">${product.price}</td>
+                      <td className="px-6 py-4 font-medium text-ink">₹{product.price}</td>
                       <td className="px-6 py-4 text-ink-soft">{product.stock}</td>
                       <td className="px-6 py-4 text-ink-soft">{product.sold || 0}</td>
                       <td className="px-6 py-4">
@@ -721,7 +721,7 @@ function ProductModal({
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-sm text-ink-soft">Price *</label>
+              <label className="mb-1.5 block text-sm text-ink-soft">Price (₹) *</label>
               <input
                 type="number"
                 min="0"
