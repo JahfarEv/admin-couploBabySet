@@ -33,7 +33,10 @@ export default function ProductsPage() {
   // Filter products
   const filtered = useMemo(() => {
     return products.filter((p) => {
-      const matchesQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const normalizedQuery = searchQuery.toLowerCase()
+      const matchesQuery =
+        p.name.toLowerCase().includes(normalizedQuery) ||
+        (p.description || '').toLowerCase().includes(normalizedQuery)
       const matchesCategory = category === 'All' || p.category === category
       return matchesQuery && matchesCategory
     })
@@ -179,7 +182,7 @@ export default function ProductsPage() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[820px] border-collapse text-left text-sm">
+              <table className="w-full min-w-[900px] border-collapse text-left text-sm">
                 <thead>
                   <tr className="text-ink-muted">
                     <th className="px-6 py-4 font-medium">Product</th>
@@ -209,6 +212,9 @@ export default function ProductsPage() {
                           )}
                           <div>
                             <p className="font-medium text-ink">{product.name}</p>
+                            {product.description && (
+                              <p className="mt-0.5 max-w-xs truncate text-xs text-ink-muted">{product.description}</p>
+                            )}
                             {product.customizable && <p className="text-xs text-ink-muted">Customizable</p>}
                           </div>
                         </div>
@@ -577,6 +583,7 @@ function ProductModal({
   onSave: (product: Product | Omit<Product, 'id'>) => Promise<void>
 }) {
   const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [category, setCategory] = useState<ProductCategory>(availableCategories[0]?.name ?? 'Onesies')
   const [price, setPrice] = useState('')
   const [stock, setStock] = useState('')
@@ -592,6 +599,7 @@ function ProductModal({
   useEffect(() => {
     if (product) {
       setName(product.name)
+      setDescription(product.description || '')
       setCategory(product.category)
       setPrice(String(product.price))
       setStock(String(product.stock))
@@ -606,6 +614,7 @@ function ProductModal({
   useEffect(() => {
     if (!product) {
       setName('')
+      setDescription('')
       setCategory(availableCategories[0]?.name ?? 'Onesies')
       setPrice('')
       setStock('')
@@ -645,6 +654,7 @@ function ProductModal({
 
       const productData = {
         name: name.trim(),
+        description: description.trim(),
         category,
         price: priceNum,
         stock: stockNum,
@@ -701,6 +711,18 @@ function ProductModal({
               placeholder="e.g. Organic Cotton Onesie"
               className="w-full rounded-xl border border-black/10 bg-cream-soft px-3.5 py-2.5 text-sm focus:border-mauve-400 focus:outline-none"
               required
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="mb-1.5 block text-sm text-ink-soft">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add product details, materials, or care notes"
+              rows={3}
+              className="w-full resize-none rounded-xl border border-black/10 bg-cream-soft px-3.5 py-2.5 text-sm focus:border-mauve-400 focus:outline-none"
             />
           </div>
 

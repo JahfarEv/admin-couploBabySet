@@ -21,6 +21,7 @@ export interface Category {
 export interface Product {
   id: string
   name: string
+  description?: string
   category: ProductCategory
   price: number
   stock: number
@@ -79,6 +80,7 @@ export interface AdminUser {
 export interface Product {
   id: string;
   name: string;
+  description?: string;
   category: ProductCategory;
   price: number;
   stock: number;
