@@ -37,15 +37,7 @@ if (isLoading) {
     return <Loader />
   }
 
-  // async function handleSubmit(e: FormEvent) {
-  //   e.preventDefault()
-  //   try {
-  //     await login(email, password, remember)
-  //     navigate('/', { replace: true })
-  //   } catch {
-  //     // error surfaced via auth context
-  //   }
-  // }
+
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-cream px-4 py-10">
@@ -54,11 +46,16 @@ if (isLoading) {
 
       <div className="relative w-full max-w-md rounded-3xl border border-black/5 bg-white p-10 shadow-panel">
         <div className="flex flex-col items-center text-center">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-blush-100 text-2xl">
-            🙂
-          </span>
-          <h1 className="mt-4 font-display text-2xl font-semibold text-mauve-600">Couplo Baby Set</h1>
-          <p className="mt-1 text-ink-muted">Admin Portal Access</p>
+           <div className="p-3 rounded-full bg-gradient-to-r from-blush-200 to-mauve-200 shadow-xl">
+  <div className="p-2 rounded-full bg-white">
+    <img 
+      src="/fav1.PNG" 
+      alt="Couplo Baby Set Logo" 
+      className="h-32 w-32 object-contain rounded-full"
+    />
+  </div>
+</div>
+<p className="mt-4 text-ink-muted">Admin Portal Access</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
@@ -135,23 +132,10 @@ if (isLoading) {
           </button>
         </form>
 
-        <div className="mt-8 border-t border-black/5 pt-6 text-center">
-          <div className="flex items-center justify-center -space-x-2">
-            <span className="h-8 w-8 rounded-full border-2 border-white bg-blush-200" />
-            <span className="h-8 w-8 rounded-full border-2 border-white bg-sand-100" />
-            <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-cream-deep text-xs text-ink-muted">
-              +
-            </span>
-          </div>
-          <p className="mt-3 text-xs tracking-widest text-ink-faint">NURTURED ELEGANCE SINCE 2024</p>
-        </div>
+    
       </div>
 
-      <div className="relative mt-6 flex gap-6 text-sm text-ink-muted">
-        <a href="#" className="hover:text-ink-soft">Privacy Policy</a>
-        <a href="#" className="hover:text-ink-soft">Support</a>
-        <a href="#" className="hover:text-ink-soft">User Agreement</a>
-      </div>
+      
     </div>
   )
 }
