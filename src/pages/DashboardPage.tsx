@@ -565,16 +565,13 @@ export default function DashboardPage() {
                 <Plus size={16} />
                 Add New Product
               </Link>
-              <button
-                type="button"
-                className="flex items-center gap-3 rounded-xl bg-mint-500 px-4 py-3.5 text-left text-white transition-opacity hover:opacity-90"
+              <Link
+                to="/categories"
+                className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-black/15 py-3.5 text-sm font-medium text-ink-soft transition-colors hover:border-mauve-400 hover:text-mauve-600"
               >
-                <MessageCircle size={18} />
-                <span>
-                  <span className="block text-sm font-medium">WhatsApp Inquiries</span>
-                  <span className="block text-xs text-white/80">12 Pending Messages</span>
-                </span>
-              </button>
+                <Plus size={16} />
+                Add New Category
+              </Link>
             </div>
           </div>
 

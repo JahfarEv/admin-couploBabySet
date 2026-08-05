@@ -36,7 +36,8 @@ export default function ProductsPage() {
       const normalizedQuery = searchQuery.toLowerCase()
       const matchesQuery =
         p.name.toLowerCase().includes(normalizedQuery) ||
-        (p.description || '').toLowerCase().includes(normalizedQuery)
+        (p.description || '').toLowerCase().includes(normalizedQuery) ||
+        (p.includes || []).some((item) => item.toLowerCase().includes(normalizedQuery))
       const matchesCategory = category === 'All' || p.category === category
       return matchesQuery && matchesCategory
     })
@@ -188,8 +189,7 @@ export default function ProductsPage() {
                     <th className="px-6 py-4 font-medium">Product</th>
                     <th className="px-6 py-4 font-medium">Category</th>
                     <th className="px-6 py-4 font-medium">Price</th>
-                    <th className="px-6 py-4 font-medium">Stock</th>
-                    <th className="px-6 py-4 font-medium">Sold</th>
+                    <th className="px-6 py-4 font-medium">Created Date</th>
                     <th className="px-6 py-4 font-medium">Status</th>
                     <th className="px-6 py-4 font-medium text-right">Actions</th>
                   </tr>
@@ -215,14 +215,30 @@ export default function ProductsPage() {
                             {product.description && (
                               <p className="mt-0.5 max-w-xs truncate text-xs text-ink-muted">{product.description}</p>
                             )}
+                            {product.includes && product.includes.length > 0 && (
+                              <div className="mt-1 flex max-w-xs flex-wrap gap-1">
+                                {product.includes.slice(0, 3).map((item) => (
+                                  <span
+                                    key={item}
+                                    className="rounded-full bg-mauve-50 px-2 py-0.5 text-[11px] text-mauve-700"
+                                  >
+                                    {item}
+                                  </span>
+                                ))}
+                                {product.includes.length > 3 && (
+                                  <span className="rounded-full bg-black/5 px-2 py-0.5 text-[11px] text-ink-muted">
+                                    +{product.includes.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                             {product.customizable && <p className="text-xs text-ink-muted">Customizable</p>}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-ink-soft">{product.category}</td>
                       <td className="px-6 py-4 font-medium text-ink">₹{product.price}</td>
-                      <td className="px-6 py-4 text-ink-soft">{product.stock}</td>
-                      <td className="px-6 py-4 text-ink-soft">{product.sold || 0}</td>
+                      <td className="px-6 py-4 text-ink-soft">{formatDate(product.createdAt)}</td>
                       <td className="px-6 py-4">
                         <StatusBadge status={product.status} />
                       </td>
@@ -584,6 +600,7 @@ function ProductModal({
 }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [includesText, setIncludesText] = useState('')
   const [category, setCategory] = useState<ProductCategory>(availableCategories[0]?.name ?? 'Onesies')
   const [price, setPrice] = useState('')
   const [stock, setStock] = useState('')
@@ -600,6 +617,7 @@ function ProductModal({
     if (product) {
       setName(product.name)
       setDescription(product.description || '')
+      setIncludesText((product.includes || []).join('\n'))
       setCategory(product.category)
       setPrice(String(product.price))
       setStock(String(product.stock))
@@ -615,6 +633,7 @@ function ProductModal({
     if (!product) {
       setName('')
       setDescription('')
+      setIncludesText('')
       setCategory(availableCategories[0]?.name ?? 'Onesies')
       setPrice('')
       setStock('')
@@ -655,6 +674,10 @@ function ProductModal({
       const productData = {
         name: name.trim(),
         description: description.trim(),
+        includes: includesText
+          .split(/\r?\n/)
+          .map((item) => item.trim())
+          .filter((item) => item && item.toLowerCase() !== 'includes:'),
         category,
         price: priceNum,
         stock: stockNum,
@@ -724,6 +747,19 @@ function ProductModal({
               rows={3}
               className="w-full resize-none rounded-xl border border-black/10 bg-cream-soft px-3.5 py-2.5 text-sm focus:border-mauve-400 focus:outline-none"
             />
+          </div>
+
+          {/* Includes */}
+          <div>
+            <label className="mb-1.5 block text-sm text-ink-soft">Includes</label>
+            <textarea
+              value={includesText}
+              onChange={(e) => setIncludesText(e.target.value)}
+              placeholder={'Premium Half Romper\nMatching Cap\nHand Socks\nMatching Booties'}
+              rows={4}
+              className="w-full resize-none rounded-xl border border-black/10 bg-cream-soft px-3.5 py-2.5 text-sm focus:border-mauve-400 focus:outline-none"
+            />
+            <p className="mt-1 text-xs text-ink-muted">Add one item per line. These save as customer-side tags.</p>
           </div>
 
           {/* Category and Price */}
@@ -838,4 +874,15 @@ function ProductModal({
       </div>
     </div>
   )
+}
+
+function formatDate(value: any) {
+  if (!value) return "";
+  const date = value?.toDate ? value.toDate() : new Date(value);
+  if (isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }

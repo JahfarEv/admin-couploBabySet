@@ -22,6 +22,7 @@ export interface Product {
   id: string
   name: string
   description?: string
+  includes?: string[]
   category: ProductCategory
   price: number
   stock: number
@@ -81,6 +82,7 @@ export interface Product {
   id: string;
   name: string;
   description?: string;
+  includes?: string[];
   category: ProductCategory;
   price: number;
   stock: number;

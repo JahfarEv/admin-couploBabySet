@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { db, doc, getDoc, serverTimestamp, setDoc } from '@/config/firebase'
+import { ChevronDown, ChevronUp, X } from 'lucide-react'
 
 const BANNER_DOC_ID = 'home'
 
@@ -58,7 +59,7 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSending, setIsSending] = useState(false)
   const [bannerTitle, setBannerTitle] = useState('Welcome to Couplo')
-  const [bannerImage, setBannerImage] = useState('')
+  const [bannerImages, setBannerImages] = useState<string[]>([])
   const [bannerStatus, setBannerStatus] = useState<string | null>(null)
   const [isSavingBanner, setIsSavingBanner] = useState(false)
   const [isUploadingBannerImage, setIsUploadingBannerImage] = useState(false)
@@ -72,7 +73,9 @@ export default function SettingsPage() {
         if (snapshot.exists()) {
           const data = snapshot.data()
           if (data?.title) setBannerTitle(data.title)
-          if (data?.image) setBannerImage(data.image)
+          const savedImages = Array.isArray(data?.images) ? data.images.filter(Boolean) : []
+          const legacyImage = data?.image ? [data.image] : []
+          setBannerImages(savedImages.length ? savedImages : legacyImage)
         }
       } catch (err) {
         console.error('Failed to load banner settings:', err)
@@ -102,6 +105,31 @@ export default function SettingsPage() {
     }
   }
 
+  const handleBannerImageUpload = (imageUrl: string) => {
+    if (!imageUrl) return
+
+    setBannerImages((currentImages) => [...currentImages, imageUrl])
+    setBannerStatus(null)
+  }
+
+  const handleBannerImageRemove = (indexToRemove: number) => {
+    setBannerImages((currentImages) => currentImages.filter((_, index) => index !== indexToRemove))
+    setBannerStatus(null)
+  }
+
+  const moveBannerImage = (index: number, direction: -1 | 1) => {
+    setBannerImages((currentImages) => {
+      const nextIndex = index + direction
+      if (nextIndex < 0 || nextIndex >= currentImages.length) return currentImages
+
+      const nextImages = [...currentImages]
+      const [image] = nextImages.splice(index, 1)
+      nextImages.splice(nextIndex, 0, image)
+      return nextImages
+    })
+    setBannerStatus(null)
+  }
+
   const handleBannerSave = async () => {
     if (isUploadingBannerImage) {
       setBannerStatus('Please wait for the image upload to finish before saving.')
@@ -117,7 +145,8 @@ export default function SettingsPage() {
         bannerRef,
         {
           title: bannerTitle,
-          image: bannerImage,
+          image: bannerImages[0] || '',
+          images: bannerImages,
           updatedAt: serverTimestamp(),
         },
         { merge: true }
@@ -155,25 +184,76 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm text-ink-soft">Banner image</label>
+            <label className="mb-2 block text-sm text-ink-soft">Banner images</label>
             <ImageUpload
-              currentImage={bannerImage}
+              key={bannerImages.length}
+              currentImage=""
               onUploadStateChange={setIsUploadingBannerImage}
-              onImageUpload={(imageUrl) => {
-                setBannerImage(imageUrl)
-                setBannerStatus(null)
-              }}
+              onImageUpload={handleBannerImageUpload}
             />
+            <p className="mt-2 text-xs text-ink-muted">Upload multiple images to show them as a scrolling banner on the storefront.</p>
+
+            {bannerImages.length > 0 && (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {bannerImages.map((imageUrl, index) => (
+                  <div key={`${imageUrl}-${index}`} className="overflow-hidden rounded-xl border border-black/10 bg-white">
+                    <div className="relative">
+                      <img src={imageUrl} alt={`Banner ${index + 1}`} className="h-28 w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleBannerImageRemove(index)}
+                        className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white shadow-sm transition-colors hover:bg-red-600"
+                        aria-label={`Remove banner ${index + 1}`}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between px-3 py-2">
+                      <span className="text-xs font-medium text-ink-soft">Banner {index + 1}</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => moveBannerImage(index, -1)}
+                          disabled={index === 0}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-black/10 text-ink-soft transition-colors hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40"
+                          aria-label={`Move banner ${index + 1} up`}
+                        >
+                          <ChevronUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveBannerImage(index, 1)}
+                          disabled={index === bannerImages.length - 1}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-black/10 text-ink-soft transition-colors hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40"
+                          aria-label={`Move banner ${index + 1} down`}
+                        >
+                          <ChevronDown size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="rounded-2xl border border-dashed border-black/10 bg-cream-soft/60 p-4">
             <p className="text-sm font-medium text-ink">Preview</p>
             <div className="mt-3 overflow-hidden rounded-2xl border border-black/10 bg-white">
-              {bannerImage ? (
-                <img src={bannerImage} alt="Banner preview" className="h-40 w-full object-cover" />
+              {bannerImages.length > 0 ? (
+                <div className="grid grid-flow-col auto-cols-[85%] gap-3 overflow-x-auto bg-white p-3">
+                  {bannerImages.map((imageUrl, index) => (
+                    <img
+                      key={`${imageUrl}-preview-${index}`}
+                      src={imageUrl}
+                      alt={`Banner preview ${index + 1}`}
+                      className="h-40 w-full rounded-xl object-cover"
+                    />
+                  ))}
+                </div>
               ) : (
                 <div className="flex h-40 items-center justify-center bg-cream-soft text-sm text-ink-muted">
-                  Upload an image to see the banner preview
+                  Upload images to see the banner preview
                 </div>
               )}
               <div className="p-4">

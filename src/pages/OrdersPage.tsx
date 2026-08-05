@@ -137,6 +137,21 @@ interface OrderItem {
   quantity: number;
   rate: number;
   embroideredText?: string;
+  babyAge?: string;
+  babyName?: string;
+  bow?: string;
+  capName?: string;
+  contactNumber?: string;
+  designImageName?: string;
+  designImageUrl?: string;
+  embroideryColor?: string;
+  embroideryText?: string;
+  fontStyle?: string;
+  giftMessage?: string;
+  giftWrap?: boolean;
+  romperName?: string;
+  size?: string;
+  specialNotes?: string;
 }
 
 interface Order {
@@ -185,14 +200,32 @@ export default function OrdersPage() {
         const data: Order[] = snapshot.docs.map((docSnap: any) => {
           const d = docSnap.data();
           const items: OrderItem[] = (d.items ?? []).map(
-            (item: any, i: number) => ({
-              id: `${docSnap.id}-${i}`,
-              productName:
-                item.productName ?? item.product?.name ?? "Unknown item",
-              quantity: item.quantity ?? 1,
-              rate: item.rate ?? item.product?.price ?? 0,
-              embroideredText: item.embroideredText ?? undefined,
-            }),
+            (item: any, i: number) => {
+              const c = item.customization || {};
+              return {
+                id: `${docSnap.id}-${i}`,
+                productName:
+                  item.productName ?? item.product?.name ?? "Unknown item",
+                quantity: item.quantity ?? 1,
+                rate: item.rate ?? item.product?.price ?? 0,
+                embroideredText: item.embroideredText ?? c.embroideredText ?? undefined,
+                babyAge: item.babyAge ?? c.babyAge ?? undefined,
+                babyName: item.babyName ?? c.babyName ?? undefined,
+                bow: item.bow ?? c.bow ?? undefined,
+                capName: item.capName ?? c.capName ?? undefined,
+                contactNumber: item.contactNumber ?? c.contactNumber ?? undefined,
+                designImageName: item.designImageName ?? c.designImageName ?? undefined,
+                designImageUrl: item.designImageUrl ?? c.designImageUrl ?? undefined,
+                embroideryColor: item.embroideryColor ?? c.embroideryColor ?? undefined,
+                embroideryText: item.embroideryText ?? c.embroideryText ?? undefined,
+                fontStyle: item.fontStyle ?? c.fontStyle ?? undefined,
+                giftMessage: item.giftMessage ?? c.giftMessage ?? undefined,
+                giftWrap: item.giftWrap ?? c.giftWrap ?? undefined,
+                romperName: item.romperName ?? c.romperName ?? undefined,
+                size: item.size ?? item.selectedSize ?? c.size ?? c.selectedSize ?? undefined,
+                specialNotes: item.specialNotes ?? c.specialNotes ?? undefined,
+              };
+            },
           );
 
           const total = items.reduce(
@@ -367,17 +400,35 @@ const filtered = useMemo(() => {
                     </td>
                     <td className="px-6 py-4 text-ink-muted">{order.date}</td>
                     <td className="px-6 py-4 text-ink-soft">
-                      <div className="space-y-1">
+                      <div className="space-y-4">
                         {order.items.map((item) => (
-                          <div key={item.id}>
-                            <span>
+                          <div key={item.id} className="border-b border-black/5 pb-3 last:border-0 last:pb-0">
+                            <div className="font-medium text-ink">
                               {item.productName} × {item.quantity}
-                            </span>
-                            {item.embroideredText && (
-                              <span className="ml-1.5 text-xs text-ink-muted">
-                                ("{item.embroideredText}")
-                              </span>
-                            )}
+                            </div>
+                            <div className="mt-1 flex flex-col gap-0.5 text-xs text-ink-muted">
+                              {item.babyAge && <div><span className="font-medium">Baby Age:</span> {item.babyAge}</div>}
+                              {item.babyName && <div><span className="font-medium">Baby Name:</span> {item.babyName}</div>}
+                              {item.bow && <div><span className="font-medium">Bow:</span> {item.bow}</div>}
+                              {item.capName && <div><span className="font-medium">Cap Name:</span> {item.capName}</div>}
+                              {item.contactNumber && <div><span className="font-medium">Contact:</span> {item.contactNumber}</div>}
+                              {(item.embroideredText || item.embroideryText) && <div><span className="font-medium">Embroidered Text:</span> {item.embroideredText || item.embroideryText}</div>}
+                              {item.embroideryColor && <div><span className="font-medium">Embroidery Color:</span> {item.embroideryColor}</div>}
+                              {item.fontStyle && <div><span className="font-medium">Font Style:</span> {item.fontStyle}</div>}
+                              {item.giftMessage && <div><span className="font-medium">Gift Message:</span> {item.giftMessage}</div>}
+                              {item.giftWrap && <div><span className="font-medium">Gift Wrap:</span> Yes</div>}
+                              {item.romperName && <div><span className="font-medium">Romper Name:</span> {item.romperName}</div>}
+                              {item.size && <div><span className="font-medium">Size:</span> {item.size}</div>}
+                              {item.specialNotes && <div><span className="font-medium">Special Notes:</span> {item.specialNotes}</div>}
+                              {item.designImageUrl && (
+                                <div className="mt-2">
+                                  <span className="font-medium block mb-1">Design Image:</span>
+                                  <a href={item.designImageUrl} target="_blank" rel="noreferrer">
+                                    <img src={item.designImageUrl} alt={item.designImageName || 'Design'} className="w-16 h-16 object-cover rounded border border-black/10" />
+                                  </a>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>

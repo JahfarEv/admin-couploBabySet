@@ -96,7 +96,6 @@ interface Customer {
   initials: string
   location: string
   orders: number
-  totalSpent: number
   joined: string
 }
 
@@ -112,22 +111,45 @@ export default function CustomersPage() {
     async function fetchCustomers() {
       try {
         setLoading(true)
-        const snapshot = await getDocs(collection(db, 'users'))
+        const [usersSnap, ordersSnap] = await Promise.all([
+          getDocs(collection(db, 'users')),
+          getDocs(collection(db, 'orders'))
+        ])
 
-        const data: Customer[] = snapshot.docs.map((docSnap: any) => {
+        const orderCountsByEmail: Record<string, number> = {}
+        const orderCountsById: Record<string, number> = {}
+
+        ordersSnap.forEach((doc: any) => {
+          const d = doc.data()
+          if (d.userEmail) {
+            orderCountsByEmail[d.userEmail] = (orderCountsByEmail[d.userEmail] || 0) + 1
+          }
+          if (d.userId) {
+            orderCountsById[d.userId] = (orderCountsById[d.userId] || 0) + 1
+          }
+        })
+
+        const data: Customer[] = usersSnap.docs.map((docSnap: any) => {
           const d = docSnap.data()
           const name = d.name ?? 'Unknown customer'
+          const email = d.email ?? '—'
+          
+          let ordersCount = d.orders ?? 0
+          if (d.email && orderCountsByEmail[d.email]) {
+            ordersCount = orderCountsByEmail[d.email]
+          } else if (orderCountsById[docSnap.id]) {
+            ordersCount = orderCountsById[docSnap.id]
+          }
 
           return {
             id: docSnap.id,
             name,
-            email: d.email ?? '—',
+            email,
             phone: d.phone ?? '—',
 
             initials: getInitials(name),
             location: d.location ?? '—',
-            orders: d.orders ?? 0,
-            totalSpent: d.totalSpent ?? 0,
+            orders: ordersCount,
             joined: d.joinedDate ?? '—',
           }
         })
@@ -191,7 +213,6 @@ export default function CustomersPage() {
                   <th className="px-6 py-4 font-medium">Customer</th>
                   <th className="px-6 py-4 font-medium">Phone</th>
                   <th className="px-6 py-4 font-medium">Orders</th>
-                  <th className="px-6 py-4 font-medium">Total Spent</th>
                   <th className="px-6 py-4 font-medium">Joined</th>
                 </tr>
               </thead>
@@ -209,7 +230,6 @@ export default function CustomersPage() {
                     </td>
                     <td className="px-6 py-4 text-ink-soft">{customer.phone}</td>
                     <td className="px-6 py-4 text-ink-soft">{customer.orders}</td>
-                    <td className="px-6 py-4 font-medium text-ink">${customer.totalSpent.toFixed(2)}</td>
                     <td className="px-6 py-4 text-ink-muted">{customer.joined}</td>
                   </tr>
                 ))}

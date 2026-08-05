@@ -1,5 +1,5 @@
 // components/ui/ImageUpload.tsx
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useId, useState, useRef } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { uploadToCloudinary } from '@/utils/cloudinary';
 
@@ -22,6 +22,7 @@ export function ImageUpload({
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(currentImage || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
 
   useEffect(() => {
     setPreviewUrl(currentImage || '');
@@ -121,10 +122,10 @@ export function ImageUpload({
             onChange={handleFileSelect}
             disabled={isUploading || disabled}
             className="hidden"
-            id="image-upload"
+            id={inputId}
           />
           <label
-            htmlFor="image-upload"
+            htmlFor={inputId}
             className={`cursor-pointer rounded-lg border border-black/10 px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-black/5 ${
               (isUploading || disabled) ? 'cursor-not-allowed opacity-50' : ''
             }`}
