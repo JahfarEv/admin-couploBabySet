@@ -127,6 +127,7 @@ import { ShoppingBag, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
 import EmptyState from "@/components/ui/EmptyState";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { db, collection, getDocs, doc, updateDoc } from "@/config/firebase";
 import type { OrderStatus } from "@/types";
@@ -156,6 +157,7 @@ interface OrderItem {
 
 interface Order {
   id: string;
+  orderId: string;
   customerName: string;
   userEmail: string;
   customerInitials: string;
@@ -163,6 +165,7 @@ interface Order {
   items: OrderItem[];
   status: OrderStatus;
   total: number;
+  trackingBarcodeImageUrl?: string;
 }
 
 const FILTERS: (OrderStatus | "All")[] = [
@@ -188,6 +191,9 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [uploadingBarcodeId, setUploadingBarcodeId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -235,6 +241,7 @@ export default function OrdersPage() {
 
           return {
             id: docSnap.id,
+            orderId: d.orderId ?? docSnap.id,
             customerName: d.userName ?? "Unknown customer",
             userEmail: d.userEmail ?? "Unknown customer",
 
@@ -243,6 +250,7 @@ export default function OrdersPage() {
             items,
             status: (d.status as OrderStatus) ?? "Pending",
             total,
+            trackingBarcodeImageUrl: d.trackingBarcodeImageUrl ?? "",
           };
         });
 
@@ -268,6 +276,7 @@ const filtered = useMemo(() => {
     const matchesQuery =
       (o.customerName || "").toLowerCase().includes(search) ||
       (o.userEmail || "").toLowerCase().includes(search) ||
+      (o.orderId || "").toLowerCase().includes(search) ||
       (o.id || "").toLowerCase().includes(search);
 
     const matchesFilter =
@@ -303,6 +312,36 @@ const filtered = useMemo(() => {
       setError("Could not update order status. Please try again.");
     } finally {
       setUpdatingId(null);
+    }
+  }
+
+  async function handleBarcodeImageUpload(orderId: string, imageUrl: string) {
+    const previous = orders.find(
+      (o) => o.id === orderId,
+    )?.trackingBarcodeImageUrl;
+
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === orderId
+          ? { ...order, trackingBarcodeImageUrl: imageUrl }
+          : order,
+      ),
+    );
+
+    try {
+      await updateDoc(doc(db, "orders", orderId), {
+        trackingBarcodeImageUrl: imageUrl,
+      });
+    } catch (err) {
+      console.error(`Failed to update barcode image for order ${orderId}:`, err);
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId
+            ? { ...order, trackingBarcodeImageUrl: previous ?? "" }
+            : order,
+        ),
+      );
+      setError("Could not update tracking barcode image. Please try again.");
     }
   }
 
@@ -385,7 +424,7 @@ const filtered = useMemo(() => {
                     className="border-t border-black/5 align-top"
                   >
                     <td className="px-6 py-4 font-medium text-ink">
-                      {order.id}
+                      {order.orderId}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2.5">
@@ -434,7 +473,8 @@ const filtered = useMemo(() => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                      <div className="flex min-w-56 flex-col gap-3">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <StatusBadge status={order.status} />
                         <select
                           value={order.status}
@@ -453,6 +493,29 @@ const filtered = useMemo(() => {
                             </option>
                           ))}
                         </select>
+                        </div>
+                        {order.status === "Shipped" && (
+                          <div className="rounded-xl border border-black/5 bg-cream-soft p-3">
+                            <p className="mb-2 text-xs font-medium text-ink-soft">
+                              Tracking Barcode
+                            </p>
+                            <ImageUpload
+                              currentImage={order.trackingBarcodeImageUrl}
+                              disabled={
+                                updatingId === order.id ||
+                                uploadingBarcodeId === order.id
+                              }
+                              onUploadStateChange={(isUploading) =>
+                                setUploadingBarcodeId(
+                                  isUploading ? order.id : null,
+                                )
+                              }
+                              onImageUpload={(imageUrl) =>
+                                handleBarcodeImageUpload(order.id, imageUrl)
+                              }
+                            />
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right font-semibold text-ink">
