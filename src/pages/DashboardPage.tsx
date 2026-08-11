@@ -246,7 +246,7 @@ export default function DashboardPage() {
           )
 
           return {
-            id: docSnap.id,
+            id: d.orderId ?? docSnap.id,
             customerName: d.userName ?? d.customerName ?? "Unknown customer",
             userEmail: d.userEmail ?? d.customerEmail ?? "Unknown email",
             customerInitials: getInitials(d.userName ?? d.customerName ?? ""),
@@ -301,7 +301,7 @@ export default function DashboardPage() {
         // Get processing orders count
         const processingOrdersQuery = query(
           collection(db, 'orders'),
-          where('status', '==', 'Processing')
+          where('status', '==', 'Confirm and Processing')
         )
         const processingSnapshot = await getDocs(processingOrdersQuery)
         const processingOrders = processingSnapshot.size
@@ -404,7 +404,7 @@ export default function DashboardPage() {
             {
               label: 'Pending Orders',
               value: totalPendingOrders,
-              change: `${totalPendingOrders} pending, ${processingOrders} processing`,
+              change: `${totalPendingOrders} pending, ${processingOrders} confirm and processing`,
               trend: totalPendingOrders > 0 ? 'down' : 'neutral',
               icon: Clock,
               badge: totalPendingOrders > 0 ? totalPendingOrders : undefined,
@@ -531,7 +531,7 @@ export default function DashboardPage() {
                   {recentOrders.map((order) => (
                     <tr key={order.id} className="border-t border-black/5">
                       <td className="py-4 font-medium text-ink">
-                        {order.id.slice(0, 8)}...
+                        {order.id}
                       </td>
                       <td className="py-4">
                         <div className="flex items-center gap-2.5">

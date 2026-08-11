@@ -17,7 +17,7 @@ export const recentOrders: Order[] = [
 export const orders: Order[] = [
   ...recentOrders,
   { id: '#CO-8838', customerName: 'Priya Nair', customerInitials: 'PN', date: 'Oct 10, 2023', status: 'Delivered', total: 156.0, items: 2 },
-  { id: '#CO-8837', customerName: 'Marcus Lee', customerInitials: 'ML', date: 'Oct 10, 2023', status: 'Processing', total: 72.0, items: 1 },
+  { id: '#CO-8837', customerName: 'Marcus Lee', customerInitials: 'ML', date: 'Oct 10, 2023', status: 'Confirm and Processing', total: 72.0, items: 1 },
   { id: '#CO-8836', customerName: 'Ayesha Khan', customerInitials: 'AK', date: 'Oct 9, 2023', status: 'Delivered', total: 198.5, items: 4 },
   { id: '#CO-8835', customerName: 'Daniel Kim', customerInitials: 'DK', date: 'Oct 9, 2023', status: 'Shipped', total: 64.0, items: 1 },
 ]

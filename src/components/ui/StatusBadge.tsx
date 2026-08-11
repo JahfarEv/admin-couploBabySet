@@ -2,7 +2,7 @@ const STYLES: Record<string, string> = {
   Shipped: 'bg-sky-100 text-sky-500',
   Delivered: 'bg-mint-100 text-mint-500',
   Pending: 'bg-blush-100 text-mauve-500',
-  Processing: 'bg-blush-100 text-mauve-500',
+  'Confirm and Processing': 'bg-blush-100 text-mauve-500',
   Cancelled: 'bg-sand-100 text-ink-muted',
   Active: 'bg-mint-100 text-mint-500',
   Draft: 'bg-sand-100 text-ink-muted',

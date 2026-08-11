@@ -123,7 +123,7 @@
 
 
 
-import { ShoppingBag, Search } from "lucide-react";
+import { ShoppingBag, Search, MessageCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
 import EmptyState from "@/components/ui/EmptyState";
@@ -166,19 +166,20 @@ interface Order {
   status: OrderStatus;
   total: number;
   trackingBarcodeImageUrl?: string;
+  phone?: string;
 }
 
 const FILTERS: (OrderStatus | "All")[] = [
   "All",
   "Pending",
-  "Processing",
+  "Confirm and Processing",
   "Shipped",
   "Delivered",
   "Cancelled",
 ];
 const STATUS_OPTIONS: OrderStatus[] = [
   "Pending",
-  "Processing",
+  "Confirm and Processing",
   "Shipped",
   "Delivered",
   "Cancelled",
@@ -201,10 +202,29 @@ export default function OrdersPage() {
     async function fetchOrders() {
       try {
         setLoading(true);
-        const snapshot = await getDocs(collection(db, "orders"));
+        const [ordersSnap, usersSnap] = await Promise.all([
+          getDocs(collection(db, "orders")),
+          getDocs(collection(db, "users")),
+        ]);
 
-        const data: Order[] = snapshot.docs.map((docSnap: any) => {
+        const usersMap = new Map();
+        usersSnap.forEach((docSnap: any) => {
+          const u = docSnap.data();
+          usersMap.set(docSnap.id, u);
+          if (u.email) {
+            usersMap.set(u.email.toLowerCase(), u);
+          }
+        });
+
+        const data: Order[] = ordersSnap.docs.map((docSnap: any) => {
           const d = docSnap.data();
+          let dbPhone = "";
+          if (d.userId) {
+            dbPhone = usersMap.get(d.userId)?.phone ?? usersMap.get(d.userId)?.phoneNumber ?? "";
+          }
+          if (!dbPhone && d.userEmail) {
+            dbPhone = usersMap.get(d.userEmail.toLowerCase())?.phone ?? usersMap.get(d.userEmail.toLowerCase())?.phoneNumber ?? "";
+          }
           const items: OrderItem[] = (d.items ?? []).map(
             (item: any, i: number) => {
               const c = item.customization || {};
@@ -251,6 +271,7 @@ export default function OrdersPage() {
             status: (d.status as OrderStatus) ?? "Pending",
             total,
             trackingBarcodeImageUrl: d.trackingBarcodeImageUrl ?? "",
+            phone: d.orderContactNumber ?? d.contactNumber ?? d.phone ?? d.userPhone ?? d.phoneNumber ?? items.find((i: any) => i.contactNumber)?.contactNumber ?? dbPhone ?? "",
           };
         });
 
@@ -414,6 +435,7 @@ const filtered = useMemo(() => {
                   <th className="px-6 py-4 font-medium">Date</th>
                   <th className="px-6 py-4 font-medium">Items</th>
                   <th className="px-6 py-4 font-medium">Status</th>
+                  <th className="px-6 py-4 font-medium">Contact</th>
                   <th className="px-6 py-4 text-right font-medium">Total</th>
                 </tr>
               </thead>
@@ -517,6 +539,21 @@ const filtered = useMemo(() => {
                           </div>
                         )}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {order.phone ? (
+                        <a
+                          href={`https://wa.me/${order.phone.replace(/[^\d+]/g, '')}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366]/10 px-3 py-1.5 text-xs font-medium text-[#1DA851] hover:bg-[#25D366]/20 transition-colors"
+                        >
+                          <MessageCircle size={14} />
+                          WhatsApp
+                        </a>
+                      ) : (
+                        <span className="text-xs text-ink-faint italic">No contact</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right font-semibold text-ink">
                       ${order.total.toFixed(2)}
