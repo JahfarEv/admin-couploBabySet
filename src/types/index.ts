@@ -28,6 +28,7 @@ export interface Product {
   stock: number
   sold: number
   image: string
+  images?: string[]
   status: 'Active' | 'Draft' | 'Out of Stock'
   customizable: boolean
 }
@@ -88,6 +89,7 @@ export interface Product {
   stock: number;
   sold: number;
   image: string; // Now stores Cloudinary URL
+  images?: string[];
   status: 'Active' | 'Draft' | 'Out of Stock';
   customizable: boolean;
   createdAt?: string;

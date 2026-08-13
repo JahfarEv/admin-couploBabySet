@@ -607,7 +607,7 @@ function ProductModal({
   const [sold, setSold] = useState('')
   const [status, setStatus] = useState<'Active' | 'Draft' | 'Out of Stock'>('Draft')
   const [customizable, setCustomizable] = useState(false)
-  const [image, setImage] = useState('')
+  const [images, setImages] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -624,7 +624,7 @@ function ProductModal({
       setSold(String(product.sold || 0))
       setStatus(product.status)
       setCustomizable(product.customizable || false)
-      setImage(product.image || '')
+      setImages(product.images || (product.image ? [product.image] : []))
     }
   }, [product])
 
@@ -640,17 +640,19 @@ function ProductModal({
       setSold('')
       setStatus('Draft')
       setCustomizable(false)
-      setImage('')
+      setImages([])
       setError('')
     }
   }, [product, availableCategories])
 
-  const handleImageUpload = (imageUrl: string) => {
-    setImage(imageUrl);
-    // If image is removed, we keep the field empty
-    if (!imageUrl) {
-      setImage('');
+  const handleImageUpload = (imageUrl: string, index: number) => {
+    const newImages = [...images];
+    if (imageUrl) {
+      newImages[index] = imageUrl;
+    } else {
+      newImages.splice(index, 1);
     }
+    setImages(newImages);
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -684,7 +686,8 @@ function ProductModal({
         sold: Number(sold) || 0,
         status,
         customizable,
-        image: image.trim() || '🧸', // Use emoji as fallback if no image uploaded
+        image: images[0] || '🧸', // Use first image or emoji as fallback
+        images: images,
       }
 
       if (product) {
@@ -832,25 +835,23 @@ function ProductModal({
               </div>
 
           {/* Image Upload */}
-          <div>
-            <label className="mb-1.5 block text-sm text-ink-soft">Product Image</label>
-            <ImageUpload
-              currentImage={image}
-              onImageUpload={handleImageUpload}
-              disabled={isLoading}
-            />
+          <div className="space-y-4">
+            <label className="block text-sm text-ink-soft">Product Images (Max 4)</label>
+            <div className="grid grid-cols-1 gap-4">
+              {[0, 1, 2, 3].map((index) => (
+                (index === 0 || images[index - 1]) ? (
+                  <ImageUpload
+                    key={index}
+                    currentImage={images[index] || ''}
+                    onImageUpload={(url) => handleImageUpload(url, index)}
+                    disabled={isLoading}
+                  />
+                ) : null
+              ))}
+            </div>
           </div>
 
-          {/* Customizable */}
-          <label className="flex items-center gap-2 text-sm text-ink-soft">
-            <input
-              type="checkbox"
-              checked={customizable}
-              onChange={(e) => setCustomizable(e.target.checked)}
-              className="h-4 w-4 rounded border-black/20 text-mauve-500 focus:ring-mauve-400"
-            />
-            Allow customization
-          </label>
+          {/* Customizable (Ignored) */}
 
           {/* Actions */}
           <div className="flex items-center gap-2 pt-1">
