@@ -166,7 +166,6 @@ interface Order {
   status: OrderStatus;
   total: number;
   trackingBarcodeImageUrl?: string;
-  estimatedDispatchingDate?: string;
   phone?: string;
 }
 
@@ -272,8 +271,6 @@ export default function OrdersPage() {
             status: (d.status as OrderStatus) ?? "Pending",
             total,
             trackingBarcodeImageUrl: d.trackingBarcodeImageUrl ?? "",
-            estimatedDispatchingDate:
-              d.estimatedDispatchingDate ?? d.estimatedDispatchDate ?? "",
             phone: d.orderContactNumber ?? d.contactNumber ?? d.phone ?? d.userPhone ?? d.phoneNumber ?? items.find((i: any) => i.contactNumber)?.contactNumber ?? dbPhone ?? "",
           };
         });
@@ -366,38 +363,6 @@ const filtered = useMemo(() => {
         ),
       );
       setError("Could not update tracking barcode image. Please try again.");
-    }
-  }
-
-  async function handleEstimatedDispatchingDateChange(
-    orderId: string,
-    estimatedDispatchingDate: string,
-  ) {
-    const previous = orders.find((order) => order.id === orderId)?.estimatedDispatchingDate ?? "";
-
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === orderId ? { ...order, estimatedDispatchingDate } : order,
-      ),
-    );
-
-    try {
-      await updateDoc(doc(db, "orders", orderId), {
-        estimatedDispatchingDate,
-      });
-    } catch (err) {
-      console.error(
-        `Failed to update estimated dispatching date for order ${orderId}:`,
-        err,
-      );
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === orderId
-            ? { ...order, estimatedDispatchingDate: previous }
-            : order,
-        ),
-      );
-      setError("Could not update estimated dispatching date. Please try again.");
     }
   }
 
@@ -553,25 +518,6 @@ const filtered = useMemo(() => {
                         </div>
                         {order.status === "Shipped" && (
                           <div className="rounded-xl border border-black/5 bg-cream-soft p-3">
-                            <label
-                              htmlFor={`estimated-dispatching-date-${order.id}`}
-                              className="mb-2 block text-xs font-medium text-ink-soft"
-                            >
-                              Estimated Dispatching Date
-                            </label>
-                            <input
-                              id={`estimated-dispatching-date-${order.id}`}
-                              type="date"
-                              value={order.estimatedDispatchingDate ?? ""}
-                              disabled={updatingId === order.id}
-                              onChange={(e) =>
-                                handleEstimatedDispatchingDateChange(
-                                  order.id,
-                                  e.target.value,
-                                )
-                              }
-                              className="mb-3 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-xs text-ink-soft focus:border-mauve-400 focus:outline-none disabled:opacity-50"
-                            />
                             <p className="mb-2 text-xs font-medium text-ink-soft">
                               Tracking Barcode
                             </p>

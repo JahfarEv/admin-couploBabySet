@@ -604,6 +604,7 @@ function ProductModal({
   const [category, setCategory] = useState<ProductCategory>(availableCategories[0]?.name ?? 'Onesies')
   const [price, setPrice] = useState('')
   const [stock, setStock] = useState('')
+  const [expectedDispatchDays, setExpectedDispatchDays] = useState('')
   const [sold, setSold] = useState('')
   const [status, setStatus] = useState<'Active' | 'Draft' | 'Out of Stock'>('Draft')
   const [customizable, setCustomizable] = useState(false)
@@ -621,6 +622,7 @@ function ProductModal({
       setCategory(product.category)
       setPrice(String(product.price))
       setStock(String(product.stock))
+      setExpectedDispatchDays(String(product.expectedDispatchDays ?? ''))
       setSold(String(product.sold || 0))
       setStatus(product.status)
       setCustomizable(product.customizable || false)
@@ -637,6 +639,7 @@ function ProductModal({
       setCategory(availableCategories[0]?.name ?? 'Onesies')
       setPrice('')
       setStock('')
+      setExpectedDispatchDays('')
       setSold('')
       setStatus('Draft')
       setCustomizable(false)
@@ -672,6 +675,10 @@ function ProductModal({
       if (!stock || isNaN(stockNum) || stockNum < 0) {
         throw new Error('Stock cannot be negative')
       }
+      const dispatchDaysNum = Number(expectedDispatchDays)
+      if (expectedDispatchDays && (isNaN(dispatchDaysNum) || dispatchDaysNum < 0 || !Number.isInteger(dispatchDaysNum))) {
+        throw new Error('Expected dispatch days must be a non-negative whole number')
+      }
 
       const productData = {
         name: name.trim(),
@@ -683,6 +690,7 @@ function ProductModal({
         category,
         price: priceNum,
         stock: stockNum,
+        ...(expectedDispatchDays ? { expectedDispatchDays: dispatchDaysNum } : {}),
         sold: Number(sold) || 0,
         status,
         customizable,
@@ -793,6 +801,20 @@ function ProductModal({
                 required
               />
             </div>
+          </div>
+
+          {/* Expected Dispatch Days */}
+          <div>
+            <label className="mb-1.5 block text-sm text-ink-soft">Expected Dispatch Days</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={expectedDispatchDays}
+              onChange={(e) => setExpectedDispatchDays(e.target.value)}
+              placeholder="e.g. 3"
+              className="w-full rounded-xl border border-black/10 bg-cream-soft px-3.5 py-2.5 text-sm focus:border-mauve-400 focus:outline-none"
+            />
           </div>
 
           {/* Stock and Sold */}
