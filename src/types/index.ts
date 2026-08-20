@@ -27,6 +27,7 @@ export interface Product {
   price: number
   stock: number
   expectedDispatchDays?: number
+  expectedDeliveryDays?: number
   sold: number
   image: string
   images?: string[]
@@ -89,6 +90,7 @@ export interface Product {
   price: number;
   stock: number;
   expectedDispatchDays?: number;
+  expectedDeliveryDays?: number;
   sold: number;
   image: string; // Now stores Cloudinary URL
   images?: string[];

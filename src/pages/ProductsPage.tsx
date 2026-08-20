@@ -605,6 +605,7 @@ function ProductModal({
   const [price, setPrice] = useState('')
   const [stock, setStock] = useState('')
   const [expectedDispatchDays, setExpectedDispatchDays] = useState('')
+  const [expectedDeliveryDays, setExpectedDeliveryDays] = useState('')
   const [sold, setSold] = useState('')
   const [status, setStatus] = useState<'Active' | 'Draft' | 'Out of Stock'>('Draft')
   const [customizable, setCustomizable] = useState(false)
@@ -623,6 +624,7 @@ function ProductModal({
       setPrice(String(product.price))
       setStock(String(product.stock))
       setExpectedDispatchDays(String(product.expectedDispatchDays ?? ''))
+      setExpectedDeliveryDays(String(product.expectedDeliveryDays ?? ''))
       setSold(String(product.sold || 0))
       setStatus(product.status)
       setCustomizable(product.customizable || false)
@@ -640,6 +642,7 @@ function ProductModal({
       setPrice('')
       setStock('')
       setExpectedDispatchDays('')
+      setExpectedDeliveryDays('')
       setSold('')
       setStatus('Draft')
       setCustomizable(false)
@@ -679,6 +682,10 @@ function ProductModal({
       if (expectedDispatchDays && (isNaN(dispatchDaysNum) || dispatchDaysNum < 0 || !Number.isInteger(dispatchDaysNum))) {
         throw new Error('Expected dispatch days must be a non-negative whole number')
       }
+      const deliveryDaysNum = Number(expectedDeliveryDays)
+      if (expectedDeliveryDays && (isNaN(deliveryDaysNum) || deliveryDaysNum < 0 || !Number.isInteger(deliveryDaysNum))) {
+        throw new Error('Expected delivery days must be a non-negative whole number')
+      }
 
       const productData = {
         name: name.trim(),
@@ -691,6 +698,7 @@ function ProductModal({
         price: priceNum,
         stock: stockNum,
         ...(expectedDispatchDays ? { expectedDispatchDays: dispatchDaysNum } : {}),
+        ...(expectedDeliveryDays ? { expectedDeliveryDays: deliveryDaysNum } : {}),
         sold: Number(sold) || 0,
         status,
         customizable,
@@ -813,6 +821,20 @@ function ProductModal({
               value={expectedDispatchDays}
               onChange={(e) => setExpectedDispatchDays(e.target.value)}
               placeholder="e.g. 3"
+              className="w-full rounded-xl border border-black/10 bg-cream-soft px-3.5 py-2.5 text-sm focus:border-mauve-400 focus:outline-none"
+            />
+          </div>
+
+          {/* Expected Delivery Days */}
+          <div>
+            <label className="mb-1.5 block text-sm text-ink-soft">Expected Delivery Days</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={expectedDeliveryDays}
+              onChange={(e) => setExpectedDeliveryDays(e.target.value)}
+              placeholder="e.g. 7"
               className="w-full rounded-xl border border-black/10 bg-cream-soft px-3.5 py-2.5 text-sm focus:border-mauve-400 focus:outline-none"
             />
           </div>

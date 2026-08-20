@@ -123,13 +123,13 @@
 
 
 
-import { ShoppingBag, Search, MessageCircle } from "lucide-react";
+import { ShoppingBag, Search, MessageCircle, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
 import EmptyState from "@/components/ui/EmptyState";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import StatusBadge from "@/components/ui/StatusBadge";
-import { db, collection, getDocs, doc, updateDoc } from "@/config/firebase";
+import { db, collection, getDocs, doc, updateDoc, deleteDoc } from "@/config/firebase";
 import type { OrderStatus } from "@/types";
 
 interface OrderItem {
@@ -192,6 +192,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [uploadingBarcodeId, setUploadingBarcodeId] = useState<string | null>(
     null,
   );
@@ -366,6 +367,28 @@ const filtered = useMemo(() => {
     }
   }
 
+  async function handleDeleteOrder(orderId: string, displayOrderId: string) {
+    const confirmed = window.confirm(
+      `Delete order ${displayOrderId}? This action cannot be undone.`,
+    );
+    if (!confirmed) return;
+
+    const previousOrders = orders;
+    setDeletingId(orderId);
+    setError(null);
+    setOrders((prev) => prev.filter((order) => order.id !== orderId));
+
+    try {
+      await deleteDoc(doc(db, "orders", orderId));
+    } catch (err) {
+      console.error(`Failed to delete order ${orderId}:`, err);
+      setOrders(previousOrders);
+      setError("Could not delete order. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div>
       <div>
@@ -426,7 +449,7 @@ const filtered = useMemo(() => {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[760px] border-collapse text-left text-sm">
               <thead>
                 <tr className="text-ink-muted">
                   <th className="px-6 py-4 font-medium">Order ID</th>
@@ -437,6 +460,7 @@ const filtered = useMemo(() => {
                   <th className="px-6 py-4 font-medium">Status</th>
                   <th className="px-6 py-4 font-medium">Contact</th>
                   <th className="px-6 py-4 text-right font-medium">Total</th>
+                  <th className="px-6 py-4 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -557,6 +581,18 @@ const filtered = useMemo(() => {
                     </td>
                     <td className="px-6 py-4 text-right font-semibold text-ink">
                       ${order.total.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteOrder(order.id, order.orderId)}
+                        disabled={deletingId === order.id}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label={`Delete order ${order.orderId}`}
+                        title="Delete order"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))}
